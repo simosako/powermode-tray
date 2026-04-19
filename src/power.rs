@@ -160,39 +160,21 @@ fn get_power_set_active_overlay() -> Option<FnPowerSetOverlay> {
     })
 }
 
-#[cfg(debug_assertions)]
-unsafe fn call_overlay_getter(name: &str, func: FnPowerGetOverlay) -> Result<GUID, u32> {
+unsafe fn call_overlay_getter(_name: &str, func: FnPowerGetOverlay) -> Result<GUID, u32> {
     let mut guid = GUID_BALANCED;
     let ret = func(&mut guid);
     if ret == 0 {
         Ok(guid)
     } else {
-        crate::debug_log!("{} => ret={}, guid={:?}", name, ret, guid);
+        crate::debug_log!("{} => ret={}, guid={:?}", _name, ret, guid);
         Err(ret)
     }
 }
 
-#[cfg(not(debug_assertions))]
-unsafe fn call_overlay_getter(func: FnPowerGetOverlay) -> Result<GUID, u32> {
-    let mut guid = GUID_BALANCED;
-    let ret = func(&mut guid);
-    if ret == 0 {
-        Ok(guid)
-    } else {
-        Err(ret)
-    }
-}
-
-#[cfg(debug_assertions)]
-unsafe fn call_overlay_setter(name: &str, func: FnPowerSetOverlay, guid: &GUID) -> u32 {
+unsafe fn call_overlay_setter(_name: &str, func: FnPowerSetOverlay, guid: &GUID) -> u32 {
     let ret = func(guid);
-    crate::debug_log!("{} => ret={}", name, ret);
+    crate::debug_log!("{} => ret={}", _name, ret);
     ret
-}
-
-#[cfg(not(debug_assertions))]
-unsafe fn call_overlay_setter(func: FnPowerSetOverlay, guid: &GUID) -> u32 {
-    func(guid)
 }
 
 #[repr(u32)]
@@ -377,11 +359,7 @@ pub fn get_current_mode() -> PowerMode {
     unsafe {
         // Try PowerGetEffectiveOverlayScheme first
         if let Some(func) = get_power_get_effective_overlay() {
-            match call_overlay_getter(
-                #[cfg(debug_assertions)]
-                "PowerGetEffectiveOverlayScheme",
-                func,
-            ) {
+            match call_overlay_getter("PowerGetEffectiveOverlayScheme", func) {
                 Ok(guid) => {
                     return PowerMode::from_guid(&guid);
                 }
@@ -391,11 +369,7 @@ pub fn get_current_mode() -> PowerMode {
 
         // Fallback to PowerGetActualOverlayScheme
         if let Some(func) = get_power_get_actual_overlay() {
-            match call_overlay_getter(
-                #[cfg(debug_assertions)]
-                "PowerGetActualOverlayScheme",
-                func,
-            ) {
+            match call_overlay_getter("PowerGetActualOverlayScheme", func) {
                 Ok(guid) => {
                     return PowerMode::from_guid(&guid);
                 }
@@ -419,12 +393,7 @@ pub fn set_mode(mode: PowerMode) {
 
     unsafe {
         if let Some(func) = get_power_set_active_overlay() {
-            let ret = call_overlay_setter(
-                #[cfg(debug_assertions)]
-                "PowerSetActiveOverlayScheme",
-                func,
-                &guid,
-            );
+            let ret = call_overlay_setter("PowerSetActiveOverlayScheme", func, &guid);
             if ret != 0 {
                 crate::debug_log!("WARNING: PowerSetActiveOverlayScheme failed (ret={})", ret);
             }
