@@ -51,9 +51,10 @@ unsafe fn initialize_tray_mode(hwnd: HWND, mode: PowerMode) {
     debug_log!("Tray icon added for mode: {:?}", mode);
 }
 
+/// Initiate graceful shutdown by destroying the window.
+/// All resource cleanup (timer, tray icon, energy saver tracking) is
+/// handled in the WM_DESTROY handler to keep teardown in one place.
 unsafe fn request_shutdown(hwnd: HWND) {
-    KillTimer(hwnd, MODE_POLL_TIMER_ID);
-    tray::remove_tray_icon(hwnd);
     tray::destroy_window(hwnd);
 }
 
@@ -96,8 +97,6 @@ unsafe extern "system" fn wnd_proc(
             } else if cmd_id == IDM_QUIT {
                 debug_log!("Quit requested");
                 request_shutdown(hwnd);
-                power::shutdown_energy_saver_tracking();
-                request_shutdown(hwnd);
             } else if let Some(mode) = PowerMode::from_menu_id(cmd_id) {
                 debug_log!("Mode change requested: {:?}", mode);
                 power::set_mode(mode);
@@ -120,6 +119,7 @@ unsafe extern "system" fn wnd_proc(
         WM_DESTROY => {
             debug_log!("WM_DESTROY — shutting down");
             KillTimer(hwnd, MODE_POLL_TIMER_ID);
+            tray::remove_tray_icon(hwnd);
             power::shutdown_energy_saver_tracking();
             PostQuitMessage(0);
             0
