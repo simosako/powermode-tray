@@ -9,15 +9,15 @@ use windows_sys::Win32::UI::Shell::{
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DestroyWindow, LoadIconW, LoadImageW, RegisterClassW,
-    CW_USEDEFAULT, HMENU, IDI_APPLICATION, IMAGE_ICON, LR_DEFAULTSIZE, LR_SHARED, WNDCLASSW,
-    WS_OVERLAPPEDWINDOW,
+    CW_USEDEFAULT, HMENU, IDI_APPLICATION, IMAGE_ICON, LR_DEFAULTSIZE, LR_SHARED, WM_USER,
+    WNDCLASSW, WS_OVERLAPPEDWINDOW,
 };
 
 use crate::power::PowerMode;
 use crate::util::{to_wide, to_wide_array};
 
 /// Custom message ID for tray icon events (WM_USER + 1)
-pub const WM_TRAY_ICON: u32 = 0x0400 + 1;
+pub const WM_TRAY_ICON: u32 = WM_USER + 1;
 
 /// Tray icon ID
 const TRAY_ICON_ID: u32 = 1;
