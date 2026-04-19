@@ -14,7 +14,7 @@ A tiny system tray utility to switch Windows 11 power modes (Balanced / Best Per
 - 💤 Detects Windows Energy Saver state and disables manual mode switching while it is active
 - ⚡ Uses undocumented `powrprof.dll` APIs directly — no `powercfg` subprocess spawning
 - 🪶 Minimal memory footprint — no GUI framework, pure Win32 API
-- 📦 Single small executable with zero runtime dependencies
+- 📦 Single small executable (< 300KB) with zero runtime dependencies
 
 ## Screenshot
 
