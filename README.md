@@ -89,7 +89,8 @@ Windows 11 power modes are controlled through **power overlay schemes** — undo
 
 | File | Role |
 |------|------|
-| `src/main.rs` | Entry point, window procedure, message loop, `debug_log!` macro |
+| `src/main.rs` | Entry point, window procedure, message loop |
+| `src/debug.rs` | Debug logging implementation and `debug_log!` macro |
 | `src/tray.rs` | Hidden window creation, tray icon add/remove |
 | `src/menu.rs` | Right-click context menu construction and display |
 | `src/power.rs` | Power mode get/set via `powrprof.dll` dynamic loading |
@@ -97,7 +98,7 @@ Windows 11 power modes are controlled through **power overlay schemes** — undo
 
 ## Debug build
 
-Debug builds output timestamped logs to `%LOCALAPPDATA%\powermode-tray\powermode-tray.log`. Release builds have all logging code completely removed at compile time (zero cost).
+Debug builds output timestamped logs to `%LOCALAPPDATA%\powermode-tray\powermode-tray.log`. The `debug_log!` macro is implemented in `src/debug.rs` and can be used from any module via `crate::debug_log!`. Release builds have all logging code completely removed at compile time (zero cost).
 
 ```bash
 # Debug build (with logging)

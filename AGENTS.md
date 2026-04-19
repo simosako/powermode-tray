@@ -38,14 +38,15 @@ cargo xwin build --target x86_64-pc-windows-msvc --release
 
 - Output is written to `%LOCALAPPDATA%\powermode-tray\powermode-tray.log` in **debug builds only**
 - In release builds, the logging code is removed completely (zero cost)
-- Use the `debug_log!` macro (defined in `src/main.rs` and re-exported crate-wide with `pub(crate) use`)
-- Logs record timestamps (UNIX epoch seconds), along with `powercfg` stdout/stderr/exit code
+- Use the `debug_log!` macro defined in `src/debug.rs` and re-exported crate-wide with `pub(crate) use`
+- Logs record timestamps (UNIX epoch seconds) along with debug messages from the tray, window, and power-management paths
 
 ## Architecture
 
 | File | Role |
 |---|---|
-| `src/main.rs` | Entry point, window procedure, message loop, and `debug_log!` macro definition |
+| `src/main.rs` | Entry point, window procedure, and message loop |
+| `src/debug.rs` | Debug logging implementation and `debug_log!` macro |
 | `src/tray.rs` | Hidden window creation and tray icon add/remove |
 | `src/menu.rs` | Right-click context menu construction and display |
 | `src/power.rs` | Power mode retrieval and setting via the `powrprof.dll` API |
