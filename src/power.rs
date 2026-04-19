@@ -132,8 +132,8 @@ fn get_powrprof_lib() -> Option<HMODULE> {
 /// The DLL handle is cached; only one LoadLibraryW call occurs per process.
 unsafe fn load_powrprof_fn(name: &[u8]) -> Option<*const ()> {
     let lib = match get_powrprof_lib() {
-        Some(lib) if !lib.is_null() => lib,
-        _ => return None,
+        Some(lib) => lib,
+        None => return None,
     };
     let proc = GetProcAddress(lib, name.as_ptr());
     if proc.is_none() {
