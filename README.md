@@ -6,6 +6,8 @@ A tiny system tray utility to switch Windows 11 power modes (Balanced / Best Per
 ![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)
 ![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)
 
+![Tray menu screenshot](docs/screenshot1.png)
+
 ## Features
 
 - 🔋 Switch between **Balanced**, **Best Performance**, and **Best Power Efficiency** modes from the system tray
@@ -15,19 +17,6 @@ A tiny system tray utility to switch Windows 11 power modes (Balanced / Best Per
 - ⚡ Uses undocumented `powrprof.dll` APIs directly — no `powercfg` subprocess spawning
 - 🪶 Minimal memory footprint — no GUI framework, pure Win32 API
 - 📦 Single small executable (< 300KB) with zero runtime dependencies
-
-## Screenshot
-
-Right-click the tray icon to see the context menu:
-
-```
-    Best Performance
-  ✓ Balanced
-    Best Power Efficiency
-  ─────────────────────
-    About
-    Quit
-```
 
 ## Installation
 
