@@ -1,0 +1,4 @@
+[target.x86_64-pc-windows-msvc]
+# This project normally builds on Windows with the MSVC toolchain.
+# When cross-compiling from Linux with cargo-xwin, ensure llvm-mingw bin is in PATH:
+#   export PATH="$HOME/.local/toolchains/llvm-mingw-20250114-ucrt-ubuntu-20.04-x86_64/bin:$PATH"

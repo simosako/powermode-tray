@@ -1,0 +1,28 @@
+[package]
+name = "powermode-tray"
+version = "0.2.0"
+edition = "2021"
+description = "A tiny tray utility to control Windows 11 power mode"
+license = "MIT OR Apache-2.0"
+build = "build.rs"
+
+[build-dependencies]
+embed-resource = "2.5"
+
+[dependencies.windows-sys]
+version = "0.59"
+features = [
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Power",
+    "Win32_Graphics_Gdi",
+    "Win32_Foundation",
+]
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1
+panic = "abort"
