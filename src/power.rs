@@ -1,4 +1,7 @@
-/// Power mode overlay GUIDs for Windows 11
+/// Power mode overlay GUIDs used by the undocumented powrprof.dll APIs.
+/// Note: the documented GUID_POWERSCHEME_PERSONALITY Balanced GUID is
+/// 381b4222-f694-41f0-9685-ff5bb260df2e, but these overlay APIs represent
+/// Balanced as the null GUID.
 /// Balanced:              00000000-0000-0000-0000-000000000000
 /// Best Performance:      ded574b5-45a0-4f42-8737-46345c09c238
 /// Best Power Efficiency: 961cc777-2547-4f9d-8174-7d86181b8a7a

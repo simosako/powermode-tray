@@ -79,8 +79,12 @@ Windows 11 power modes are controlled through **power overlay schemes** — undo
 
 ### Power mode GUIDs
 
-| Mode | GUID |
-|------|------|
+The Microsoft page for [Power Setting GUIDs](https://learn.microsoft.com/en-us/windows/win32/power/power-setting-guids) documents the **power scheme personality** GUIDs exposed through `GUID_POWERSCHEME_PERSONALITY` notifications. In that documented list, the Balanced personality is `381b4222-f694-41f0-9685-ff5bb260df2e`.
+
+This app does **not** use those notification GUIDs. It uses the undocumented `powrprof.dll` overlay APIs listed above. With those APIs, `Balanced` is represented by the null GUID, while the other two modes use these overlay GUIDs:
+
+| Mode | Overlay GUID used by this app |
+|------|-------------------------------|
 | Balanced | `00000000-0000-0000-0000-000000000000` |
 | Best Performance | `ded574b5-45a0-4f42-8737-46345c09c238` |
 | Best Power Efficiency | `961cc777-2547-4f9d-8174-7d86181b8a7a` |
