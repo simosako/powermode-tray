@@ -33,7 +33,7 @@ Right-click the tray icon to see the context menu:
 
 ### Download
 
-Download the latest `powermode-tray.exe` from the [Releases](https://github.com/AkiraShimosako/powermode-tray/releases) page.
+Download the latest `powermode-tray.exe` from the [Releases](https://github.com/simosako/powermode-tray/releases) page.
 
 ### Build from source
 
