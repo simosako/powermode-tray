@@ -160,10 +160,10 @@ fn get_power_set_active_overlay() -> Option<FnPowerSetOverlay> {
 unsafe fn call_overlay_getter(name: &str, func: FnPowerGetOverlay) -> Result<GUID, u32> {
     let mut guid = GUID_BALANCED;
     let ret = func(&mut guid);
-    crate::debug_log!("{} => ret={}, guid={:?}", name, ret, guid);
     if ret == 0 {
         Ok(guid)
     } else {
+        crate::debug_log!("{} => ret={}, guid={:?}", name, ret, guid);
         Err(ret)
     }
 }
@@ -370,14 +370,20 @@ pub fn get_current_mode() -> PowerMode {
     unsafe {
         // Try PowerGetEffectiveOverlayScheme first
         if let Some(func) = get_power_get_effective_overlay() {
-            if let Ok(guid) = call_overlay_getter(
+            match call_overlay_getter(
                 #[cfg(debug_assertions)]
                 "PowerGetEffectiveOverlayScheme",
                 func,
             ) {
-                let mode = PowerMode::from_guid(&guid);
-                crate::debug_log!("get_current_mode => {:?}", mode);
-                return mode;
+                Ok(guid) => {
+                    return PowerMode::from_guid(&guid);
+                }
+                Err(_ret) => {
+                    crate::debug_log!(
+                        "PowerGetEffectiveOverlayScheme failed (ret={}), falling back",
+                        _ret
+                    );
+                }
             }
         }
 
@@ -389,9 +395,7 @@ pub fn get_current_mode() -> PowerMode {
                 func,
             ) {
                 Ok(guid) => {
-                    let mode = PowerMode::from_guid(&guid);
-                    crate::debug_log!("get_current_mode => {:?}", mode);
-                    return mode;
+                    return PowerMode::from_guid(&guid);
                 }
                 Err(_ret) => {
                     crate::debug_log!(
@@ -403,7 +407,7 @@ pub fn get_current_mode() -> PowerMode {
             }
         }
 
-        crate::debug_log!("get_current_mode => Balanced");
+        crate::debug_log!("No overlay getter available, defaulting to Balanced");
         PowerMode::Balanced
     }
 }
