@@ -76,8 +76,14 @@ fn tray_icon_data(hwnd: HWND, mode: PowerMode) -> NOTIFYICONDATAW {
 
 fn notify_tray_icon(message: u32, hwnd: HWND, mode: PowerMode) {
     let nid = tray_icon_data(hwnd, mode);
-    unsafe {
-        Shell_NotifyIconW(message, &nid);
+    let result = unsafe { Shell_NotifyIconW(message, &nid) };
+    if result == 0 {
+        crate::debug_log!(
+            "Shell_NotifyIconW failed for tray icon operation {} (mode: {:?}, hwnd: {:?})",
+            message,
+            mode,
+            hwnd
+        );
     }
 }
 
