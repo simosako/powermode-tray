@@ -13,7 +13,8 @@ use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     DispatchMessageW, GetMessageW, KillTimer, MessageBoxW, PostQuitMessage, SetTimer,
-    TranslateMessage, MB_OK, MSG, WM_COMMAND, WM_DESTROY, WM_RBUTTONUP, WM_TIMER,
+    TranslateMessage, MB_OK, MSG, WM_COMMAND, WM_DESTROY, WM_LBUTTONUP, WM_RBUTTONUP,
+    WM_TIMER,
 };
 
 use menu::{IDM_ABOUT, IDM_QUIT};
@@ -135,8 +136,8 @@ unsafe extern "system" fn wnd_proc(
         WM_TRAY_ICON => {
             // lparam contains the mouse message
             let mouse_msg = (lparam & 0xFFFF) as u32;
-            if mouse_msg == WM_RBUTTONUP {
-                debug_log!("Tray icon right-clicked, showing context menu");
+            if mouse_msg == WM_RBUTTONUP || mouse_msg == WM_LBUTTONUP {
+                debug_log!("Tray icon clicked, showing context menu");
                 menu::show_context_menu(hwnd);
             }
             0
