@@ -160,10 +160,10 @@ fn get_power_set_active_overlay() -> Option<FnPowerSetOverlay> {
 unsafe fn call_overlay_getter(name: &str, func: FnPowerGetOverlay) -> Result<GUID, u32> {
     let mut guid = GUID_BALANCED;
     let ret = func(&mut guid);
-    crate::debug_log!("{} => ret={}, guid={:?}", name, ret, guid);
     if ret == 0 {
         Ok(guid)
     } else {
+        crate::debug_log!("{} => ret={}, guid={:?}", name, ret, guid);
         Err(ret)
     }
 }
