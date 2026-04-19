@@ -147,8 +147,9 @@ pub fn remove_tray_icon(hwnd: HWND) {
     nid.hWnd = hwnd;
     nid.uID = TRAY_ICON_ID;
 
-    unsafe {
-        Shell_NotifyIconW(NIM_DELETE, &nid);
+    let deleted = unsafe { Shell_NotifyIconW(NIM_DELETE, &nid) };
+    if deleted == 0 {
+        crate::debug_log!("Shell_NotifyIconW(NIM_DELETE) failed");
     }
 }
 
