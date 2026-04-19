@@ -81,7 +81,7 @@ fn notify_tray_icon(message: u32, hwnd: HWND, mode: PowerMode) {
     }
 }
 
-/// Create a hidden message-only window and return its HWND.
+/// Create a hidden top-level window for message handling and return its HWND.
 /// `wnd_proc` is the window procedure that handles messages.
 pub fn create_hidden_window(
     wnd_proc: unsafe extern "system" fn(HWND, u32, WPARAM, LPARAM) -> LRESULT,
