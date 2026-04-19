@@ -7,7 +7,7 @@
 /// Best Power Efficiency: 961cc777-2547-4f9d-8174-7d86181b8a7a
 use std::ffi::c_void;
 use std::ptr;
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicPtr, AtomicU32, Ordering};
 use std::sync::{Condvar, Mutex, Once, OnceLock};
 use std::time::Duration;
 
@@ -86,9 +86,12 @@ type FnPowerSetOverlay = unsafe extern "system" fn(*const GUID) -> u32;
 
 use crate::util::to_wide;
 
-static INIT_LIB: Once = Once::new();
+struct SyncHmodule(HMODULE);
+unsafe impl Send for SyncHmodule {}
+unsafe impl Sync for SyncHmodule {}
+
+static POWRPROF_LIB: OnceLock<SyncHmodule> = OnceLock::new();
 static LOG_NO_OVERLAY_GETTER: Once = Once::new();
-static mut POWRPROF_LIB: HMODULE = std::ptr::null_mut();
 static POWER_GET_EFFECTIVE_OVERLAY: OnceLock<Option<FnPowerGetOverlay>> = OnceLock::new();
 static POWER_GET_ACTUAL_OVERLAY: OnceLock<Option<FnPowerGetOverlay>> = OnceLock::new();
 static POWER_SET_ACTIVE_OVERLAY: OnceLock<Option<FnPowerSetOverlay>> = OnceLock::new();
@@ -108,26 +111,30 @@ static ENERGY_SAVER_STATE: AtomicU32 = AtomicU32::new(ENERGY_SAVER_STATUS_UNKNOW
 static ENERGY_SAVER_READY: Mutex<bool> = Mutex::new(false);
 static ENERGY_SAVER_READY_CVAR: Condvar = Condvar::new();
 static INIT_ENERGY_SAVER: Once = Once::new();
-static mut ENERGY_SAVER_REGISTRATION: HPOWERNOTIFY = 0;
+static ENERGY_SAVER_REGISTRATION: AtomicPtr<c_void> = AtomicPtr::new(ptr::null_mut());
 
-/// Get the cached HMODULE for powrprof.dll, loading it on first call.
-unsafe fn get_powrprof_lib() -> HMODULE {
-    INIT_LIB.call_once(|| {
-        POWRPROF_LIB = LoadLibraryW(to_wide("powrprof.dll").as_ptr());
-        if POWRPROF_LIB.is_null() {
+fn get_powrprof_lib() -> Option<HMODULE> {
+    let handle = POWRPROF_LIB.get_or_init(|| {
+        let lib = unsafe { LoadLibraryW(to_wide("powrprof.dll").as_ptr()) };
+        if lib.is_null() {
             crate::debug_log!("Failed to load powrprof.dll");
         }
-    });
-    POWRPROF_LIB
+        SyncHmodule(lib)
+    }).0;
+    if handle.is_null() {
+        None
+    } else {
+        Some(handle)
+    }
 }
 
 /// Dynamically load a function from powrprof.dll by name.
 /// The DLL handle is cached; only one LoadLibraryW call occurs per process.
 unsafe fn load_powrprof_fn(name: &[u8]) -> Option<*const ()> {
-    let lib = get_powrprof_lib();
-    if lib.is_null() {
-        return None;
-    }
+    let lib = match get_powrprof_lib() {
+        Some(lib) if !lib.is_null() => lib,
+        _ => return None,
+    };
     let proc = GetProcAddress(lib, name.as_ptr());
     if proc.is_none() {
         crate::debug_log!(
@@ -302,7 +309,7 @@ pub fn init_energy_saver_tracking() {
             return;
         }
 
-        ENERGY_SAVER_REGISTRATION = registration as HPOWERNOTIFY;
+        ENERGY_SAVER_REGISTRATION.store(registration, Ordering::Release);
 
         let ready = ENERGY_SAVER_READY
             .lock()
@@ -314,14 +321,14 @@ pub fn init_energy_saver_tracking() {
 }
 
 pub fn shutdown_energy_saver_tracking() {
-    unsafe {
-        if ENERGY_SAVER_REGISTRATION == 0 {
-            return;
-        }
+    let registration = ENERGY_SAVER_REGISTRATION.swap(ptr::null_mut(), Ordering::AcqRel);
+    if registration.is_null() {
+        return;
+    }
 
-        let _result = PowerSettingUnregisterNotification(ENERGY_SAVER_REGISTRATION);
+    unsafe {
+        let _result = PowerSettingUnregisterNotification(registration as HPOWERNOTIFY);
         crate::debug_log!("PowerSettingUnregisterNotification => result={}", _result);
-        ENERGY_SAVER_REGISTRATION = 0;
     }
 }
 
