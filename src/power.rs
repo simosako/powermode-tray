@@ -95,10 +95,10 @@ const ENERGY_SAVER_STATUS_OFF: u32 = 0;
 const ENERGY_SAVER_STATE_QUERY_TIMEOUT: Duration = Duration::from_millis(250);
 
 const GUID_ENERGY_SAVER_STATUS: WinGuid = WinGuid {
-    data1: 0x550e8400,
-    data2: 0xe29b,
-    data3: 0x41d4,
-    data4: [0xa7, 0x16, 0x44, 0x66, 0x55, 0x44, 0x00, 0x00],
+    data1: 0xe00958c0,
+    data2: 0xc213,
+    data3: 0x4ace,
+    data4: [0xac, 0x77, 0xfe, 0xcc, 0xed, 0x2e, 0xee, 0xa5],
 };
 
 static ENERGY_SAVER_STATE: AtomicU32 = AtomicU32::new(ENERGY_SAVER_STATUS_UNKNOWN);
