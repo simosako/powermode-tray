@@ -40,13 +40,13 @@ fn displayed_mode() -> Option<PowerMode> {
     PowerMode::from_stored_u32(LAST_DISPLAYED_MODE.load(Ordering::SeqCst))
 }
 
-unsafe fn sync_tray_mode(hwnd: HWND, mode: PowerMode) {
+fn sync_tray_mode(hwnd: HWND, mode: PowerMode) {
     tray::update_tray_icon(hwnd, mode);
     store_displayed_mode(mode);
     debug_log!("Tray icon updated for mode: {:?}", mode);
 }
 
-unsafe fn initialize_tray_mode(hwnd: HWND, mode: PowerMode) {
+fn initialize_tray_mode(hwnd: HWND, mode: PowerMode) {
     tray::add_tray_icon(hwnd, mode);
     store_displayed_mode(mode);
     debug_log!("Tray icon added for mode: {:?}", mode);
@@ -55,7 +55,7 @@ unsafe fn initialize_tray_mode(hwnd: HWND, mode: PowerMode) {
 /// Initiate graceful shutdown by destroying the window.
 /// All resource cleanup (timer, tray icon, energy saver tracking) is
 /// handled in the WM_DESTROY handler to keep teardown in one place.
-unsafe fn request_shutdown(hwnd: HWND) {
+fn request_shutdown(hwnd: HWND) {
     if SHUTDOWN_REQUESTED.swap(true, Ordering::SeqCst) {
         return;
     }
@@ -63,14 +63,16 @@ unsafe fn request_shutdown(hwnd: HWND) {
     tray::destroy_window(hwnd);
 }
 
-unsafe fn show_about_dialog(hwnd: HWND) {
+fn show_about_dialog(hwnd: HWND) {
     if ABOUT_DIALOG_OPEN.swap(true, Ordering::SeqCst) {
         return;
     }
 
     let title = to_wide("About");
     let body = to_wide(&format!("{}\r\nVersion {}", APP_NAME, APP_VERSION));
-    MessageBoxW(hwnd, body.as_ptr(), title.as_ptr(), MB_OK);
+    unsafe {
+        MessageBoxW(hwnd, body.as_ptr(), title.as_ptr(), MB_OK);
+    }
     ABOUT_DIALOG_OPEN.store(false, Ordering::SeqCst);
 }
 

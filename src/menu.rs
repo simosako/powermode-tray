@@ -16,8 +16,8 @@ pub const IDM_QUIT: u32 = 2001;
 
 /// Show the context menu at the current cursor position.
 /// Returns when the user selects an item or dismisses the menu.
-pub unsafe fn show_context_menu(hwnd: HWND) {
-    let hmenu = CreatePopupMenu();
+pub fn show_context_menu(hwnd: HWND) {
+    let hmenu = unsafe { CreatePopupMenu() };
     if hmenu == 0 as HMENU {
         return;
     }
@@ -27,8 +27,10 @@ pub unsafe fn show_context_menu(hwnd: HWND) {
 
     if energy_saver_active {
         let status_label = to_wide("Energy saver active");
-        AppendMenuW(hmenu, MF_STRING | MF_GRAYED, 0, status_label.as_ptr());
-        AppendMenuW(hmenu, MF_SEPARATOR, 0, ptr::null());
+        unsafe {
+            AppendMenuW(hmenu, MF_STRING | MF_GRAYED, 0, status_label.as_ptr());
+            AppendMenuW(hmenu, MF_SEPARATOR, 0, ptr::null());
+        }
     }
 
     // Keep the tray menu order independent from the enum declaration order.
@@ -48,41 +50,57 @@ pub unsafe fn show_context_menu(hwnd: HWND) {
             flags |= MF_GRAYED;
         }
         let wide_label = to_wide(mode.label());
-        AppendMenuW(
-            hmenu,
-            flags,
-            mode.to_menu_id() as usize,
-            wide_label.as_ptr(),
-        );
+        unsafe {
+            AppendMenuW(
+                hmenu,
+                flags,
+                mode.to_menu_id() as usize,
+                wide_label.as_ptr(),
+            );
+        }
     }
 
     // Separator
-    AppendMenuW(hmenu, MF_SEPARATOR, 0, ptr::null());
+    unsafe {
+        AppendMenuW(hmenu, MF_SEPARATOR, 0, ptr::null());
+    }
 
     // About
     let about_label = to_wide("About");
-    AppendMenuW(hmenu, MF_STRING, IDM_ABOUT as usize, about_label.as_ptr());
+    unsafe {
+        AppendMenuW(hmenu, MF_STRING, IDM_ABOUT as usize, about_label.as_ptr());
+    }
 
     // Quit
     let quit_label = to_wide("Quit");
-    AppendMenuW(hmenu, MF_STRING, IDM_QUIT as usize, quit_label.as_ptr());
+    unsafe {
+        AppendMenuW(hmenu, MF_STRING, IDM_QUIT as usize, quit_label.as_ptr());
+    }
 
     // Get cursor position
     let mut pt: POINT = POINT { x: 0, y: 0 };
-    GetCursorPos(&mut pt);
+    unsafe {
+        GetCursorPos(&mut pt);
+    }
 
     // Required to make the menu dismiss properly when clicking outside
-    SetForegroundWindow(hwnd);
+    unsafe {
+        SetForegroundWindow(hwnd);
+    }
 
-    TrackPopupMenu(
-        hmenu,
-        TPM_LEFTALIGN | TPM_BOTTOMALIGN,
-        pt.x,
-        pt.y,
-        0,
-        hwnd,
-        ptr::null(),
-    );
+    unsafe {
+        TrackPopupMenu(
+            hmenu,
+            TPM_LEFTALIGN | TPM_BOTTOMALIGN,
+            pt.x,
+            pt.y,
+            0,
+            hwnd,
+            ptr::null(),
+        );
+    }
 
-    DestroyMenu(hmenu);
+    unsafe {
+        DestroyMenu(hmenu);
+    }
 }

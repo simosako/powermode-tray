@@ -86,7 +86,12 @@ type FnPowerSetOverlay = unsafe extern "system" fn(*const GUID) -> u32;
 
 use crate::util::to_wide;
 
+#[repr(transparent)]
 struct SyncHmodule(HMODULE);
+
+// SAFETY: This wrapper only shares a process module handle for powrprof.dll.
+// The handle is initialized once, never mutated, and never freed through this
+// type; it is only read to resolve function pointers.
 unsafe impl Send for SyncHmodule {}
 unsafe impl Sync for SyncHmodule {}
 
