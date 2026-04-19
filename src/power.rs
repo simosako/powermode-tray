@@ -252,7 +252,10 @@ impl PowerMode {
             PowerMode::BestPerformance
         } else if *guid == GUID_BEST_POWER_EFFICIENCY {
             PowerMode::BestPowerEfficiency
+        } else if *guid == GUID_BALANCED {
+            PowerMode::Balanced
         } else {
+            crate::debug_log!("Unknown power mode GUID: {:?}", guid);
             PowerMode::Balanced
         }
     }
