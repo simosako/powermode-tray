@@ -370,14 +370,20 @@ pub fn get_current_mode() -> PowerMode {
     unsafe {
         // Try PowerGetEffectiveOverlayScheme first
         if let Some(func) = get_power_get_effective_overlay() {
-            if let Ok(guid) = call_overlay_getter(
+            match call_overlay_getter(
                 #[cfg(debug_assertions)]
                 "PowerGetEffectiveOverlayScheme",
                 func,
             ) {
-                let mode = PowerMode::from_guid(&guid);
-                crate::debug_log!("get_current_mode => {:?}", mode);
-                return mode;
+                Ok(guid) => {
+                    return PowerMode::from_guid(&guid);
+                }
+                Err(_ret) => {
+                    crate::debug_log!(
+                        "PowerGetEffectiveOverlayScheme failed (ret={}), falling back",
+                        _ret
+                    );
+                }
             }
         }
 
@@ -389,9 +395,7 @@ pub fn get_current_mode() -> PowerMode {
                 func,
             ) {
                 Ok(guid) => {
-                    let mode = PowerMode::from_guid(&guid);
-                    crate::debug_log!("get_current_mode => {:?}", mode);
-                    return mode;
+                    return PowerMode::from_guid(&guid);
                 }
                 Err(_ret) => {
                     crate::debug_log!(
@@ -403,7 +407,7 @@ pub fn get_current_mode() -> PowerMode {
             }
         }
 
-        crate::debug_log!("get_current_mode => Balanced");
+        crate::debug_log!("No overlay getter available, defaulting to Balanced");
         PowerMode::Balanced
     }
 }
