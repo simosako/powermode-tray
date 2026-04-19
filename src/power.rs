@@ -84,6 +84,7 @@ type FnPowerSetOverlay = unsafe extern "system" fn(*const GUID) -> u32;
 use crate::util::to_wide;
 
 static INIT_LIB: Once = Once::new();
+static LOG_NO_OVERLAY_GETTER: Once = Once::new();
 static mut POWRPROF_LIB: HMODULE = std::ptr::null_mut();
 static POWER_GET_EFFECTIVE_OVERLAY: OnceLock<Option<FnPowerGetOverlay>> = OnceLock::new();
 static POWER_GET_ACTUAL_OVERLAY: OnceLock<Option<FnPowerGetOverlay>> = OnceLock::new();
@@ -378,12 +379,7 @@ pub fn get_current_mode() -> PowerMode {
                 Ok(guid) => {
                     return PowerMode::from_guid(&guid);
                 }
-                Err(_ret) => {
-                    crate::debug_log!(
-                        "PowerGetEffectiveOverlayScheme failed (ret={}), falling back",
-                        _ret
-                    );
-                }
+                Err(_ret) => {}
             }
         }
 
@@ -398,16 +394,14 @@ pub fn get_current_mode() -> PowerMode {
                     return PowerMode::from_guid(&guid);
                 }
                 Err(_ret) => {
-                    crate::debug_log!(
-                        "PowerGetActualOverlayScheme failed (ret={}), defaulting to Balanced",
-                        _ret
-                    );
                     return PowerMode::Balanced;
                 }
             }
         }
 
-        crate::debug_log!("No overlay getter available, defaulting to Balanced");
+        LOG_NO_OVERLAY_GETTER.call_once(|| {
+            crate::debug_log!("No overlay getter available, defaulting to Balanced");
+        });
         PowerMode::Balanced
     }
 }
