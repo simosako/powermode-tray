@@ -9,6 +9,18 @@ A lightweight utility for switching Windows 11 power modes (Balanced / Best Perf
 - External crate dependency: `windows-sys` only
 - No GUI framework used (direct Win32 API calls)
 
+## RTK
+
+`rtk` is installed. For these shell commands, use `rtk` by simply prefixing the original command and keeping all arguments unchanged: `git`, `gh`, `aws`, `docker`, `rg`, `cargo`, `npm`, `npx`, `pip`, `go`.
+
+If `rtk` itself causes the command to fail or behave incorrectly, rerun the same command without `rtk`.
+
+Skip `rtk` only when raw output is explicitly needed or the user asks for the original command.
+
+## Language
+
+Use English for source code comments and Git commit messages.
+
 ## Build Instructions
 
 Normally, build on Windows using the MSVC toolchain.
