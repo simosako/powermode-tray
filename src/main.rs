@@ -12,8 +12,8 @@ use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     DispatchMessageW, GetMessageW, KillTimer, MessageBoxW, PostQuitMessage, SetTimer,
-    TranslateMessage, MB_OK, MSG, WM_COMMAND, WM_DESTROY, WM_LBUTTONUP, WM_RBUTTONUP,
-    WM_TIMER,
+    TranslateMessage, MB_OK, MSG, WM_CLOSE, WM_COMMAND, WM_DESTROY, WM_ENDSESSION,
+    WM_LBUTTONUP, WM_QUERYENDSESSION, WM_RBUTTONUP, WM_TIMER,
 };
 
 use menu::{IDM_ABOUT, IDM_QUIT};
@@ -30,6 +30,7 @@ const MODE_UNINITIALIZED: u32 = u32::MAX;
 
 static ABOUT_DIALOG_OPEN: AtomicBool = AtomicBool::new(false);
 static LAST_DISPLAYED_MODE: AtomicU32 = AtomicU32::new(MODE_UNINITIALIZED);
+static SHUTDOWN_REQUESTED: AtomicBool = AtomicBool::new(false);
 
 fn store_displayed_mode(mode: PowerMode) {
     LAST_DISPLAYED_MODE.store(mode.to_stored_u32(), Ordering::SeqCst);
@@ -55,6 +56,10 @@ unsafe fn initialize_tray_mode(hwnd: HWND, mode: PowerMode) {
 /// All resource cleanup (timer, tray icon, energy saver tracking) is
 /// handled in the WM_DESTROY handler to keep teardown in one place.
 unsafe fn request_shutdown(hwnd: HWND) {
+    if SHUTDOWN_REQUESTED.swap(true, Ordering::SeqCst) {
+        return;
+    }
+
     tray::destroy_window(hwnd);
 }
 
@@ -102,6 +107,23 @@ unsafe extern "system" fn wnd_proc(
                 power::set_mode(mode);
                 let current_mode = power::get_current_mode();
                 sync_tray_mode(hwnd, current_mode);
+            }
+            0
+        }
+        WM_CLOSE => {
+            debug_log!("WM_CLOSE received");
+            request_shutdown(hwnd);
+            0
+        }
+        WM_QUERYENDSESSION => {
+            debug_log!("WM_QUERYENDSESSION received");
+            1
+        }
+        WM_ENDSESSION => {
+            let session_ending = wparam != 0;
+            debug_log!("WM_ENDSESSION received: ending={}", session_ending);
+            if session_ending {
+                request_shutdown(hwnd);
             }
             0
         }
