@@ -55,7 +55,7 @@ The binary will be at `target/x86_64-pc-windows-msvc/release/powermode-tray.exe`
 
 1. Run `powermode-tray.exe`
 2. A tray icon appears in the system tray (notification area)
-3. Right-click the icon to switch power modes, open the About dialog, or quit
+3. Right-click or Left-click the icon to switch power modes, open the About dialog, or quit
 
 When Windows Energy Saver is active, the menu shows `Energy saver active` and disables manual power mode switching until it is turned off.
 
