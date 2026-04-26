@@ -25,6 +25,8 @@ const IDI_POWERMODE_BALANCED: u16 = 101;
 const IDI_POWERMODE_PERFORMANCE: u16 = 102;
 const IDI_POWERMODE_EFFICIENCY: u16 = 103;
 
+pub(crate) const APP_ICON_RESOURCE_ID: u16 = IDI_POWERMODE_BALANCED;
+
 fn mode_icon_resource_id(mode: PowerMode) -> u16 {
     match mode {
         PowerMode::Balanced => IDI_POWERMODE_BALANCED,

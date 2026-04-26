@@ -9,11 +9,12 @@ mod util;
 use std::ptr;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    DispatchMessageW, GetMessageW, KillTimer, MessageBoxW, PostQuitMessage, SetTimer,
-    TranslateMessage, MB_OK, MSG, WM_CLOSE, WM_COMMAND, WM_DESTROY, WM_ENDSESSION,
-    WM_LBUTTONUP, WM_QUERYENDSESSION, WM_RBUTTONUP, WM_TIMER,
+    DispatchMessageW, GetMessageW, KillTimer, MessageBoxIndirectW, PostQuitMessage, SetTimer,
+    TranslateMessage, MSG, MSGBOXPARAMSW, MB_OK, MB_USERICON, WM_CLOSE, WM_COMMAND, WM_DESTROY,
+    WM_ENDSESSION, WM_LBUTTONUP, WM_QUERYENDSESSION, WM_RBUTTONUP, WM_TIMER,
 };
 
 use menu::{IDM_ABOUT, IDM_QUIT};
@@ -70,8 +71,23 @@ fn show_about_dialog(hwnd: HWND) {
 
     let title = to_wide("About");
     let body = to_wide(&format!("{}\r\nVersion {}", APP_NAME, APP_VERSION));
+    let hinstance = unsafe { GetModuleHandleW(ptr::null()) };
+    let icon_id = tray::APP_ICON_RESOURCE_ID as usize as *const u16;
+    let params = MSGBOXPARAMSW {
+        cbSize: std::mem::size_of::<MSGBOXPARAMSW>() as u32,
+        hwndOwner: hwnd,
+        hInstance: hinstance,
+        lpszText: body.as_ptr(),
+        lpszCaption: title.as_ptr(),
+        dwStyle: MB_OK | MB_USERICON,
+        lpszIcon: icon_id,
+        dwContextHelpId: 0,
+        lpfnMsgBoxCallback: None,
+        dwLanguageId: 0,
+    };
+
     unsafe {
-        MessageBoxW(hwnd, body.as_ptr(), title.as_ptr(), MB_OK);
+        MessageBoxIndirectW(&params);
     }
     ABOUT_DIALOG_OPEN.store(false, Ordering::SeqCst);
 }
