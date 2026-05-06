@@ -8,7 +8,8 @@ mod util;
 
 use std::ptr;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
-use windows_sys::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+use windows_sys::Win32::Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GetLastError, HANDLE, HWND, LPARAM, LRESULT, WPARAM};
+use windows_sys::Win32::System::Threading::CreateMutexW;
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 
 use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -171,6 +172,17 @@ unsafe extern "system" fn wnd_proc(
 fn main() {
     debug_log!("=== powermode-tray starting ===");
 
+    // Ensure only one instance runs at a time using a named mutex.
+    let mutex_name = to_wide("Local\\powermode-tray");
+    let mutex: HANDLE = unsafe { CreateMutexW(ptr::null(), 0, mutex_name.as_ptr()) };
+    if mutex.is_null() || unsafe { GetLastError() } == ERROR_ALREADY_EXISTS {
+        debug_log!("Another instance is already running, exiting");
+        if !mutex.is_null() {
+            unsafe { CloseHandle(mutex) };
+        }
+        return;
+    }
+
     unsafe {
         let hwnd = tray::create_hidden_window(wnd_proc);
         if hwnd.is_null() {
@@ -196,4 +208,6 @@ fn main() {
 
         debug_log!("=== powermode-tray exiting ===");
     }
+
+    unsafe { CloseHandle(mutex) };
 }
