@@ -10,7 +10,7 @@ build = "build.rs"
 embed-resource = "2.5"
 
 [dependencies.windows-sys]
-version = "0.59"
+version = "0.61"
 features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Shell",
