@@ -86,7 +86,7 @@ fn main() {
     );
 
     fs::write(&rc_path, rc_contents).expect("failed to write generated resource script");
-    embed_resource::compile(rc_path.to_str().expect("resource path is not valid UTF-8"), embed_resource::NONE);
+    let _ = embed_resource::compile(rc_path.to_str().expect("resource path is not valid UTF-8"), embed_resource::NONE);
 }
 
 fn resource_path(manifest_dir: &Path, relative_path: &str) -> String {
