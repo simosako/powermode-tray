@@ -38,5 +38,4 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            dist/powermode-tray.exe
             powermode-tray-${{ github.ref_name }}-windows-x86_64.zip

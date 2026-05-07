@@ -22,7 +22,7 @@ A tiny system tray utility to switch Windows 11 power modes (Balanced / Best Per
 
 ### Download
 
-Download the latest `powermode-tray.exe` from the [Releases](https://github.com/simosako/powermode-tray/releases) page.
+Download the latest `powermode-tray-*-windows-x86_64.zip` from the [Releases](https://github.com/simosako/powermode-tray/releases) page and extract `powermode-tray.exe`.
 
 ### Build from source
 
