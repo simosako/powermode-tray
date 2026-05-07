@@ -1,6 +1,6 @@
 [package]
 name = "powermode-tray"
-version = "0.3.7"
+version = "0.3.8"
 edition = "2021"
 description = "A tiny tray utility to control Windows 11 power mode"
 license = "MIT OR Apache-2.0"
